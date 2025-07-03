@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RealGlass - A Modern Glassmorphism Library</title>
+    
+    
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css"
+    />
+    <script src="RealGlass.standalone.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: url("https://images.unsplash.com/photo-1553095066-5014bc7b7f2d?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D")
+          no-repeat center center fixed;
+        background-size: cover;
+        color: #f0f0f0;
+        overflow-x: hidden;
+      }
+      .header {
+        position: fixed;
+        top: 20px;
+        left: 5%;
+        right: 5%;
+        height: 80px;
+        border-radius: 20px;
+        z-index: 100;
+        padding: 0 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .content {
+        padding-top: 140px;
+        max-width: 900px;
+        margin: 0 auto;
+        padding-left: 20px;
+        padding-right: 20px;
+      }
+      .logo {
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .nav-links a {
+        margin: 0 15px;
+        font-weight: 500;
+        transition: color 0.3s;
+      }
+      .nav-links a:hover {
+        color: #fff;
+      }
+      .cta-button {
+        background-color: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px 20px;
+        border-radius: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .cta-button:hover {
+        background-color: rgba(255, 255, 255, 0.4);
+      }
+      .hero {
+        text-align: center;
+        padding: 40px 0;
+        height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+      #draggable-glass-text {
+        position: absolute;
+        cursor: grab;
+        user-select: none;
+      }
+      #draggable-glass-text:active {
+        cursor: grabbing;
+      }
+      .usage-section {
+        margin-top: 60px;
+        background-color: rgba(0, 0, 0, 0.4);
+        padding: 40px;
+        border-radius: 20px;
+        margin-bottom: 40px;
+      }
+      .usage-section h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+      }
+      /* Override Prism's default background */
+      pre[class*="language-"] {
+        background: #1e1e1e !important;
+        border-radius: 10px;
+        border: none;
+      }
+      .options-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+      }
+      .options-table th,
+      .options-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .options-table th {
+        font-weight: 600;
+        background-color: rgba(0, 0, 0, 0.2);
+      }
+      .options-table td code {
+        background-color: #1e1e1e;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-family: "Courier New", Courier, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header" id="glass-header">
+      <div class="logo">RealGlass</div>
+      <div class="nav-links"></div>
+      <button class="cta-button">Get Started</button>
+    </div>
+
+    <div class="content">
+      <div class="hero">
+        <div id="draggable-glass-text"></div>
+        <p
+          id="drag-instruction"
+          style="
+            position: absolute;
+            bottom: 20px;
+            font-weight: 100;
+            font-size: 20px;
+            font-family: 'Courier New', Courier, monospace;
+            text-align: center;
+            width: 100%;
+            color: rgba(255, 255, 255, 0.7);
+            transition: opacity 0.5s;
+            pointer-events: none;
+          "
+        >
+          Drag the text or scroll
+        </p>
+      </div>
+
+      <div class="usage-section">
+        <h2>How to Use</h2>
+        <p>Add RealGlass to your site!</p>
+        <pre><code class="language-javascript">
+// 1. Include the library
+&lt;script src="https://cdn.jsdelivr.net/npm/realglass/RealGlass.standalone.js"&gt;&lt;/script&gt;
+
+const myElement = document.getElementById('my-glass-element');
+
+
+const realGlass = new RealGlass();
+// The init call screenshots the page and sets up listeners for resize
+await realGlass.init();
+
+
+await realGlass.apply(myElement, {
+  frosting: 0.2,
+  borderRadius: 20,
+  lightStrength: 1.8,
+  // ... and many more options
+});
+// To create another instance, pass in the first one as an argument, this way it screenshots the page once and reuses the same image for all instances
+/*
+const anotherRealGlass = new RealGlass(realGlass);
+await anotherRealGlass.init();
+await anotherRealGlass.apply(myElement, {
+  frosting: 0.2,
+  borderRadius: 20,
+  lightStrength: 1.8,
+  // ... and many more options
+});
+*/
+</code></pre>
+      </div>
+
+      <div class="usage-section">
+        <h2>Configuration Options</h2>
+        <p>
+          Customize the appearance of your glass effect with these parameters.
+        </p>
+        <table class="options-table">
+          <thead>
+            <tr>
+              <th>Parameter</th>
+              <th>Description</th>
+              <th>Default</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>frosting</code></td>
+              <td>
+                Controls the blurriness of the background. 0 is clear, 1 is
+                heavily blurred.
+              </td>
+              <td><code>0</code></td>
+            </tr>
+            <tr>
+              <td><code>chromaticAberration</code></td>
+              <td>The amount of color fringing, simulating lens dispersion.</td>
+              <td><code>0.5</code></td>
+            </tr>
+            <tr>
+              <td><code>glassOpacity</code></td>
+              <td>The opacity of the glass layer itself (0 to 1).</td>
+              <td><code>0.0</code></td>
+            </tr>
+            <tr>
+              <td><code>lightStrength</code></td>
+              <td>Intensity of the specular and edge lighting.</td>
+              <td><code>2.175</code></td>
+            </tr>
+            <tr>
+              <td><code>lightX</code> / <code>lightY</code></td>
+              <td>Normalized position of the light source (0 to 1).</td>
+              <td><code>0.7</code> / <code>0.3</code></td>
+            </tr>
+            <tr>
+              <td><code>edgeSmoothness</code></td>
+              <td>How soft the edges of the glass shape are.</td>
+              <td><code>2.0</code></td>
+            </tr>
+            <tr>
+              <td><code>ior</code></td>
+              <td>Index of Refraction. Controls how much light bends.</td>
+              <td><code>1.52</code></td>
+            </tr>
+            <tr>
+              <td><code>borderRadius</code></td>
+              <td>The corner radius of the glass shape in pixels.</td>
+              <td><code>50</code></td>
+            </tr>
+            <tr>
+              <td><code>specularShininess</code></td>
+              <td>
+                Controls the size and intensity of the specular highlight.
+              </td>
+              <td><code>32</code></td>
+            </tr>
+            <tr>
+              <td><code>thickness</code></td>
+              <td>
+                Simulates the thickness of the glass, affecting refraction.
+              </td>
+              <td><code>1.0</code></td>
+            </tr>
+            <tr>
+              <td><code>tintColor</code></td>
+              <td>
+                Color to tint the glass. Can be a hex string or `[r, g, b]`
+                array.
+              </td>
+              <td><code>[1, 1, 1]</code></td>
+            </tr>
+            <tr>
+              <td><code>tintStrength</code></td>
+              <td>The strength of the tint color (0 to 1).</td>
+              <td><code>0.0</code></td>
+            </tr>
+            <tr>
+              <td><code>useMask</code></td>
+              <td>
+                Set to <code>true</code> to use a custom mask instead of a
+                rounded rectangle.
+              </td>
+              <td><code>false</code></td>
+            </tr>
+            <tr>
+              <td><code>maskImage</code></td>
+              <td>An image or canvas element to use as a mask.</td>
+              <td><code>null</code></td>
+            </tr>
+            <tr>
+              <td><code>maskElement</code></td>
+              <td>An HTML element to generate a mask from.</td>
+              <td><code>null</code></td>
+            </tr>
+            <tr>
+              <td><code>maskSmoothing</code></td>
+              <td>
+                Controls the blur radius applied to the mask for softer edges.
+              </td>
+              <td><code>0.15</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", async () => {
+        const glassHeader = document.getElementById("glass-header");
+        const draggableText = document.getElementById("draggable-glass-text");
+
+        const realGlass = new RealGlass();
+        await realGlass.init({ ignoreElements: [glassHeader, draggableText] });
+
+        // Apply to header
+        await realGlass.apply(glassHeader, {
+          borderRadius: 20,
+          chromaticAberration: 0.9,
+          frosting: 0.1,
+          lightStrength: 1.5,
+          thickness: 1.5,
+          ior: 1.5,
+          chromaticAberration: 0.2,
+          lightX: 0.5,
+          lightY: 1,
+        });
+
+        // Load the mask image
+        const maskImage = new Image();
+        maskImage.src = "rg_text.png";
+        maskImage.onload = async () => {
+          const viewportWidth = window.innerWidth;
+          const desiredWidth = viewportWidth * (2 / 3);
+          const scale = desiredWidth / maskImage.naturalWidth;
+          const desiredHeight = maskImage.naturalHeight * scale;
+
+          draggableText.style.width = `${desiredWidth}px`;
+          draggableText.style.height = `${desiredHeight}px`;
+
+          // Apply to draggable text with the loaded image mask
+          const glassText = new RealGlass(realGlass);
+          await glassText.init();
+          await glassText.apply(draggableText, {
+            useMask: true,
+
+            maskSmoothing: 0.3,
+            maskImage: maskImage,
+            lightStrength: 1,
+            lightX: 0.6,
+            lightY: 0.9,
+            thickness: 1.0,
+            ior: 1.55,
+            specularShininess: 256,
+            chromaticAberration: 1,
+            tintColor: "#d0e0ff",
+            tintStrength: 0.1,
+          });
+
+          // Center the text and make it draggable
+          const hero = draggableText.parentElement;
+          draggableText.style.left = `${
+            (hero.clientWidth - draggableText.offsetWidth) / 2
+          }px`;
+          draggableText.style.top = `${
+            (hero.clientHeight - draggableText.offsetHeight) / 2
+          }px`;
+          draggableText.style.zIndex = 1001; // Above header
+
+          makeDraggable(draggableText);
+        };
+      });
+
+      function makeDraggable(element) {
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        const onDown = (e) => {
+          isDragging = true;
+          element.style.cursor = "grabbing";
+          const event = e.touches ? e.touches[0] : e;
+          offsetX = event.pageX - element.offsetLeft;
+          offsetY = event.pageY - element.offsetTop;
+
+          const instruction = document.getElementById("drag-instruction");
+          if (instruction) {
+            instruction.style.opacity = "0";
+          }
+        };
+
+        const onUp = () => {
+          isDragging = false;
+          element.style.cursor = "grab";
+        };
+
+        const onMove = (e) => {
+          if (!isDragging) return;
+          e.preventDefault(); // Prevent text selection
+          const event = e.touches ? e.touches[0] : e;
+          let newX = event.pageX - offsetX;
+          let newY = event.pageY - offsetY;
+
+          const maxX = document.body.scrollWidth - element.offsetWidth;
+          const maxY = document.body.scrollHeight - element.offsetHeight;
+
+          newX = Math.max(0, Math.min(newX, maxX));
+          newY = Math.max(0, Math.min(newY, maxY));
+
+          element.style.left = `${newX}px`;
+          element.style.top = `${newY}px`;
+        };
+
+        element.addEventListener("mousedown", onDown);
+        document.addEventListener("mouseup", onUp);
+        document.addEventListener("mousemove", onMove);
+
+        element.addEventListener("touchstart", onDown, { passive: false });
+        document.addEventListener("touchend", onUp);
+        document.addEventListener("touchmove", onMove, { passive: false });
+      }
+    </script>
+  </body>
+</html>

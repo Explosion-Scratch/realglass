@@ -1,0 +1,18 @@
+{
+  "name": "realglass",
+  "version": "1.0.1",
+  "description": "",
+  "main": "RealGlass.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "bun build ./RealGlass.js --outfile ./RealGlass.standalone.js --format cjs --minify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.6.5",
+  "dependencies": {
+    "html2canvas-pro": "^1.5.11",
+    "p5": "^2.0.3"
+  }
+}

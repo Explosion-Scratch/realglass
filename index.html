@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RealGlass Class Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.20"></script>
+    <script src="RealGlass.standalone.js"></script>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100,400;500;700&display=swap");
+      body {
+        font-family: "Inter", sans-serif;
+        margin: 0;
+        padding: 0;
+        --darkness: 0.8;
+        background: linear-gradient(
+            rgba(0, 0, 0, var(--darkness)),
+            rgba(0, 0, 0, var(--darkness))
+          ),
+          url("https://images.unsplash.com/photo-1517782924173-aac5b5fcee7b")
+            no-repeat center center fixed;
+        background-size: cover;
+      }
+      * {
+        padding: auto;
+        margin: auto;
+        box-sizing: border-box;
+      }
+
+      .glass-card {
+        position: absolute;
+        cursor: grab;
+        width: 300px;
+        height: 200px;
+        z-index: 10;
+      }
+      .glass-card:active {
+        cursor: grabbing;
+      }
+
+      :root {
+        --bg-color: #000;
+        --text-color: #fff;
+      }
+
+      .body_inner {
+        color: var(--text-color);
+        display: flex;
+        gap: 20px;
+        max-width: 700px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute;
+        top: 50%;
+        width: 60vw;
+        padding: 20px 40px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .body_inner h1 {
+        font-size: 6rem;
+        font-weight: 100;
+      }
+      .cont {
+        width: 100vw;
+        height: 100vh;
+      }
+      .btn {
+        background: var(--text-color);
+        color: var(--bg-color);
+        padding: 20px 40px;
+        border-radius: 5px;
+        font-size: 1.2rem;
+        font-weight: 700;
+        cursor: pointer;
+        margin-bottom: 30px;
+        border: none;
+        outline: none;
+      }
+      body > div:last-child > span + img {
+        display: inline !important;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="cont">
+      <div class="body_inner">
+        <h1>Real Glass</h1>
+        <div class="desc">
+          <p>
+            RealGlass is a library that allows you to create realistic glass
+            effects on your website. It is built with p5.js and html2canvas.
+          </p>
+        </div>
+        <button class="btn">Drag the card</button>
+        <a
+          href="demo.html"
+          class="text-white/50 hover:text-white transition-all underline"
+          >Docs + more demos</a
+        >
+      </div>
+    </div>
+
+    <div id="glass-card1" class="glass-card"></div>
+
+    <script type="text/javascript">
+      let realGlass;
+      let card1Element;
+      let gui;
+      let currentParameters = {
+        chromaticAberration: 50,
+        frosting: 0.0,
+        glassOpacity: 0.0,
+        lightStrength: 0.39,
+        edgeSmoothness: 10.0,
+        ior: 1.52,
+        borderRadius: 50,
+        specularShininess: 2,
+        thickness: 2.1,
+        tintColor: "#438c98",
+        tintStrength: 0.5,
+        maskSmoothing: 0.15,
+        maskSmoothingInset: 0.1,
+        useMask: false,
+        maskImage: null,
+        createCircleMask: () => createMask("circle"),
+        createStarMask: () => createMask("star"),
+        createHeartMask: () => createMask("heart"),
+        createTextMask: () => createMask("text", "GLASS"),
+        clearMask: () => {
+          currentParameters.useMask = false;
+          currentParameters.maskImage = null;
+          updateCard1();
+        },
+      };
+
+      async function initializeGlass() {
+        realGlass = new RealGlass();
+        realGlass.onclone = (doc) => {
+          const bodyInner = doc.querySelector(".cont");
+          doc.querySelector(".body_inner").style.background = "transparent";
+          const COL = "#666";
+          bodyInner.style.background = `linear-gradient(${COL} 1px, transparent 1px), linear-gradient(to right, ${COL} 1px, transparent 1px)`;
+          bodyInner.style.backgroundSize = "50px 50px";
+          bodyInner.style.backgroundRepeat = "repeat";
+          bodyInner.style.backgroundPosition = "0 0";
+        };
+        await realGlass.init();
+        // Initialize cards
+        card1Element = document.getElementById("glass-card1");
+        const bodyInnerRect = document
+          .querySelector(".body_inner")
+          .getBoundingClientRect();
+        card1Element.style.left = `${bodyInnerRect.left}px`;
+        card1Element.style.top = `${bodyInnerRect.top}px`;
+        card1Element.style.width = `${bodyInnerRect.width}px`;
+        card1Element.style.height = `${bodyInnerRect.height}px`;
+
+        await realGlass.apply(card1Element, currentParameters);
+
+        setupControls();
+        makeDraggable(card1Element);
+      }
+
+      function setupControls() {
+        gui = new lil.GUI();
+        const glassFolder = gui.addFolder("Glass");
+        glassFolder
+          .add(currentParameters, "chromaticAberration", 0, 100)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "frosting", 0, 1)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "glassOpacity", 0, 1)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "lightStrength", 0, 5)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "edgeSmoothness", 0, 100)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "ior", 1.1, 2.5)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "borderRadius", 0, 100)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "specularShininess", 0, 100)
+          .onChange(updateCard1);
+        glassFolder
+          .add(currentParameters, "thickness", 0.1, 3.0)
+          .onChange(updateCard1);
+        glassFolder.addColor(currentParameters, "tintColor").onChange((hex) => {
+          const r = parseInt(hex.slice(1, 3), 16) / 255;
+          const g = parseInt(hex.slice(3, 5), 16) / 255;
+          const b = parseInt(hex.slice(5, 7), 16) / 255;
+          currentParameters.tintColor = [r, g, b];
+          updateCard1();
+        });
+        glassFolder
+          .add(currentParameters, "tintStrength", 0, 1)
+          .onChange(updateCard1);
+
+        const maskFolder = gui.addFolder("Mask");
+        maskFolder
+          .add(currentParameters, "maskSmoothing", 0.001, 0.25)
+          .onChange(updateCard1);
+        maskFolder
+          .add(currentParameters, "maskSmoothingInset", 0, 1)
+          .onChange(updateCard1);
+        maskFolder
+          .add(currentParameters, "createCircleMask")
+          .name("Circle Mask");
+        maskFolder.add(currentParameters, "createStarMask").name("Star Mask");
+        maskFolder.add(currentParameters, "createHeartMask").name("Heart Mask");
+        maskFolder.add(currentParameters, "createTextMask").name("Text Mask");
+        maskFolder.add(currentParameters, "clearMask").name("Clear Mask");
+      }
+
+      function createMask(shape, text = "") {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        if (shape === "text") {
+          canvas.width = 500;
+          canvas.height = 160;
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "white";
+          ctx.font = "bold 150px Inter";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+        } else {
+          canvas.width = 300;
+          canvas.height = 200;
+          ctx.fillStyle = "black";
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.fillStyle = "white";
+          ctx.beginPath();
+
+          if (shape === "circle") {
+            ctx.arc(
+              canvas.width / 2,
+              canvas.height / 2,
+              Math.min(canvas.width, canvas.height) * 0.4,
+              0,
+              Math.PI * 2
+            );
+          } else if (shape === "star") {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const outerRadius = Math.min(canvas.width, canvas.height) * 0.35;
+            const innerRadius = outerRadius * 0.4;
+            const spikes = 5;
+            for (let i = 0; i < spikes * 2; i++) {
+              const radius = i % 2 === 0 ? outerRadius : innerRadius;
+              const angle = (i * Math.PI) / spikes;
+              const x = centerX + Math.cos(angle) * radius;
+              const y = centerY + Math.sin(angle) * radius;
+              if (i === 0) {
+                ctx.moveTo(x, y);
+              } else {
+                ctx.lineTo(x, y);
+              }
+            }
+            ctx.closePath();
+          } else if (shape === "heart") {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const size = Math.min(canvas.width, canvas.height) * 0.3;
+            ctx.moveTo(centerX, centerY + size * 0.3);
+            ctx.bezierCurveTo(
+              centerX,
+              centerY - size * 0.3,
+              centerX - size * 0.8,
+              centerY - size * 0.8,
+              centerX - size * 0.4,
+              centerY - size * 0.3
+            );
+            ctx.bezierCurveTo(
+              centerX - size * 0.2,
+              centerY - size * 0.5,
+              centerX,
+              centerY - size * 0.1,
+              centerX,
+              centerY + size * 0.3
+            );
+            ctx.bezierCurveTo(
+              centerX,
+              centerY - size * 0.1,
+              centerX + size * 0.2,
+              centerY - size * 0.5,
+              centerX + size * 0.4,
+              centerY - size * 0.3
+            );
+            ctx.bezierCurveTo(
+              centerX + size * 0.8,
+              centerY - size * 0.8,
+              centerX,
+              centerY - size * 0.3,
+              centerX,
+              centerY + size * 0.3
+            );
+          }
+          ctx.fill();
+        }
+
+        currentParameters.maskImage = canvas.toDataURL();
+        currentParameters.useMask = true;
+        updateCard1();
+      }
+
+      async function updateCard1() {
+        if (realGlass && card1Element) {
+          await realGlass.apply(card1Element, currentParameters);
+        }
+      }
+
+      function makeDraggable(element) {
+        let isDragging = false;
+        let offsetX, offsetY;
+
+        const onDown = (e) => {
+          isDragging = true;
+          element.style.cursor = "grabbing";
+          const event = e.touches ? e.touches[0] : e;
+          offsetX = event.pageX - element.offsetLeft;
+          offsetY = event.pageY - element.offsetTop;
+        };
+
+        const onUp = () => {
+          isDragging = false;
+          element.style.cursor = "grab";
+        };
+
+        const onMove = (e) => {
+          if (!isDragging) return;
+          const event = e.touches ? e.touches[0] : e;
+          let newX = event.pageX - offsetX;
+          let newY = event.pageY - offsetY;
+
+          const maxX = document.body.scrollWidth - element.offsetWidth;
+          const maxY = document.body.scrollHeight - element.offsetHeight;
+          newX = Math.max(0, Math.min(newX, maxX));
+          newY = Math.max(0, Math.min(newY, maxY));
+
+          element.style.left = `${newX}px`;
+          element.style.top = `${newY}px`;
+        };
+
+        element.addEventListener("mousedown", onDown);
+        document.addEventListener("mouseup", onUp);
+        document.addEventListener("mousemove", onMove);
+
+        element.addEventListener("touchstart", onDown, { passive: false });
+        document.addEventListener("touchend", onUp);
+        document.addEventListener("touchmove", onMove, { passive: false });
+      }
+
+      window.addEventListener("DOMContentLoaded", initializeGlass);
+    </script>
+  </body>
+</html>
